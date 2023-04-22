@@ -1,16 +1,23 @@
 import tkinter as tk
+from datetime import timedelta
 from tkinter import ttk, messagebox
 
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+from tkcalendar import Calendar
 
 
 class Application(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.end_date = None
+        self.start_date = None
         self.title("QA Helper")
 
         # Create main frame to hold notebook, start button, and output text
         self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(expand=True, fill="both")
+        self.main_frame.grid(sticky="nsew")
 
         # Create notebook, start button, and output text
         self.create_notebook()
@@ -33,11 +40,12 @@ class Application(tk.Tk):
 
         # Create and place widgets on the first tab
         self.create_tab1_widgets()
-
+        self.create_tab2_widgets()
         self.create_tab3_widgets()
 
         # Place the notebook on the main frame using grid
         self.notebook.grid(row=0, column=0, sticky="nsew")
+
 
     def create_tab1_widgets(self):
         # Create widgets for the first tab
@@ -60,19 +68,30 @@ class Application(tk.Tk):
         self.tab1.rowconfigure(1, weight=1)
 
     def create_tab2_widgets(self):
-        pass
+        self.calendar = Calendar(self.tab2, selectmode="day", date_pattern="y-mm-dd")
+        self.calendar.pack(padx=10, pady=10)
+
+        # Bind the date selection event
+        self.calendar.bind("<<CalendarSelected>>", self.on_date_select)
+
+    def on_date_select(self, event):
+        selected_date = self.calendar.selection_get()
+        self.start_date = selected_date
+        self.end_date = self.start_date + timedelta(days=13)
+
+        # You can use self.end_date as needed, for example:
+        print(f"Start date: {self.start_date}, End date: {self.end_date}")
+
+        self.calendar.see(self.start_date)
 
     def create_tab3_widgets(self):
         self.label3 = tk.Label(self.tab3, text="Organization:")
         self.entry3 = tk.Entry(self.tab3)
         self.submit_button3 = tk.Button(self.tab3, text="Submit", command=self.on_submit)
 
-
         self.label3.grid(row=0, column=0, sticky="w", padx=5, pady=5)
         self.entry3.grid(row=0, column=1, sticky="we", padx=5, pady=5)
         self.submit_button3.grid(row=2, column=0, columnspan=2, pady=5)
-
-
 
     def create_start_button(self):
         # Create Start button and place it in the bottom right corner using grid
@@ -101,7 +120,6 @@ class Application(tk.Tk):
         if not input_data2.strip():
             messagebox.showerror("Error", "Data 2 field is mandatory.")
             return
-
 
         self.output_text.insert("end", f"Title: {input_data1}\n")
         self.output_text.insert("end", f"Steps: {input_data2}\n")
